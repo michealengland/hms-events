@@ -263,8 +263,7 @@ export default withSelect( ( select, props ) => {
 	const { postsToShow, order, orderBy, categories } = props.attributes;
 	const { getEntityRecords } = select( 'core' );
 	
-
-	const latestPostsQuery = pickBy( {
+	const eventPostsQuery = pickBy( {
 		hms_event_types: categories, // Changes rest base to hms_event_types taxonomy and selects term by Id
 		order,
 		orderby: orderBy,
@@ -273,17 +272,17 @@ export default withSelect( ( select, props ) => {
 	},
 
 	( value ) => ! isUndefined( value ) );
-	const categoriesListQuery = {
+	const eventTypesListQuery = {
 		per_page: 100,
 		showPostsCount: true,
 	}
 
 	return {
 		// Enables post type on displayed posts.		
-		latestPosts: getEntityRecords( 'postType', 'hms_events_cpt_1', latestPostsQuery ),
+		latestPosts: getEntityRecords( 'postType', 'hmsevents', eventPostsQuery ),
 		// Adds hms_event_types dropdown selector list.
-		categoriesList: getEntityRecords( 'taxonomy','hms_event_types', categoriesListQuery ),
-	};
+		categoriesList: getEntityRecords( 'taxonomy','hms_event_types', eventTypesListQuery ),
+	}
 
 	
 

@@ -37,34 +37,6 @@ function render_block_event_post_feed( $attributes ) {
 		)
 	);
 
-	/*
-
-	// EVENTS
-    if ( is_post_type_archive( 'events' ) ) {
-
-	  $current_time = current_time( 'Ymd' );
-	  
-      $query->set( 'posts_per_page', 10 );
-      $query->set( 'post_status', 'PUBLISHED' );
-      $query->set('meta_key', 'event_date_time');
-      $query->set('orderby', 'meta_value');
-      $query->set('order', 'ASC');
-      $query->set( 'meta_query', [
-      // 'relation' => 'AND',
-          [
-            'key'     => 'event_date_time', // ENDING DATE
-            'value'   => date( 'Ymd' ), // Current Date
-            'compare' => '>=', // event_date_time is greater than or equal to $current_time
-            'type'    => 'DATE',
-          ]
-        ]
-      );
-    }
-
-	*/
-
-
-
 	$list_items_markup = '';
 	foreach ( $recent_posts as $post ) {
 		$post_id = $post['ID'];
@@ -74,22 +46,6 @@ function render_block_event_post_feed( $attributes ) {
         }
 
         $list_items_markup .= '<li>';
-        
-
-		// If Post Thumb Option Enabled
-		/* TEMP DISABLED
-		if ( isset( $attributes['displayPostThumbnail'] ) && $attributes['displayPostThumbnail'] ) {
-			if( has_post_thumbnail($post_id) ) {
-				$list_items_markup .= get_the_post_thumbnail( $post_id, 'thumbnail' );
-			}
-		}
-		*/
-
-		/*
-		if( has_post_thumbnail( $post_id ) ) {
-			$list_items_markup .= get_the_post_thumbnail( $post_id, 'thumbnail' );
-		}
-		*/
 
 		if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] ) {
 			$list_items_markup .= get_the_post_thumbnail( $post_id, 'thumbnail' );
@@ -228,25 +184,17 @@ function register_block_event_post_feed() {
 
 add_action( 'init', 'register_block_event_post_feed' );
 
-
-
-
-
-
-
-
-
 /**
  * Create API fields for additional info
  */
-function hms_blocks_register_rest_fields() {
+function hms_events_register_rest_fields() {
 	
 	// Add landscape featured image source
 	register_rest_field(
 		'hms_events_cpt_1',
 		'featured_image_src',
 		array(
-			'get_callback' => 'hms_blocks_get_image_src_landscape',
+			'get_callback' => 'hms_events_get_image_src_landscape',
 			'update_callback' => null,
 			'schema' => null,
 		)
@@ -257,22 +205,19 @@ function hms_blocks_register_rest_fields() {
 		'hms_events_cpt_1',
 		'featured_image_src_square',
 		array(
-			'get_callback' => 'hms_blocks_get_image_src_square',
+			'get_callback' => 'hms_events_get_image_src_square',
 			'update_callback' => null,
 			'schema' => null,
 		)
 	);
 
 }
-add_action( 'rest_api_init', 'hms_blocks_register_rest_fields' );
-
-
-
+add_action( 'rest_api_init', 'hms_events_register_rest_fields' );
 
 /**
  * Get landscape featured image source for the rest field
  */
-function hms_blocks_get_image_src_landscape( $object, $field_name, $request ) {
+function hms_events_get_image_src_landscape( $object, $field_name, $request ) {
 	$feat_img_array = wp_get_attachment_image_src(
 		$object['featured_media'],
 		'hms-block-post-grid-landscape',
@@ -284,7 +229,7 @@ function hms_blocks_get_image_src_landscape( $object, $field_name, $request ) {
 /**
  * Get square featured image source for the rest field
  */
-function hms_blocks_get_image_src_square( $object, $field_name, $request ) {
+function hms_events_get_image_src_square( $object, $field_name, $request ) {
 	$feat_img_array = wp_get_attachment_image_src(
 		$object['featured_media'],
 		'hms-block-post-grid-square',
@@ -293,10 +238,7 @@ function hms_blocks_get_image_src_square( $object, $field_name, $request ) {
 	return $feat_img_array[0];
 }
 
-
-
-
-function hms_blocks_register_post_meta() {
+function hms_events_register_post_meta() {
 	$args = array(
 		'type' => 'string',
 		'single' => true,
@@ -306,4 +248,4 @@ function hms_blocks_register_post_meta() {
 	register_meta( 'post', 'hms_events_meta', $args );
 }
 
-add_action( 'init', 'hms_blocks_register_post_meta' );
+add_action( 'init', 'hms_events_register_post_meta' );

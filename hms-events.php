@@ -7,7 +7,7 @@
  * Domain Path: /languages
  * Author: Mike England @mikelikethebike
  * Author URI: https://twitter.com/mikelikethebike
- * Version: 1.0.6
+ * Version: 0.0.1
  * License: GPL2+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  *
@@ -26,23 +26,14 @@ $updater->set_repository( 'hms-events' );
 
 $updater->initialize();
 
-require dirname( __FILE__ ) . '/options.php';
-
-$toggle_options = get_option( 'my_option_name');
-$form_embed_opt = $toggle_options['eb_form_embed'];
-
 // Enqueue JS and CSS
 include( plugin_dir_path( __FILE__ ) . 'lib/enqueue-scripts.php');
+
+// Register Post Types & Taxonomies
+include( plugin_dir_path( __FILE__ ) . 'lib/events-cpt.php');
 
 // Block Templates
 include( plugin_dir_path( __FILE__ ) . 'lib/block-templates.php');
 
-
-// Post Feed Callback
-include( plugin_dir_path( __FILE__ ) . 'blocks/post-feed/callback.php');
-
 // Events Post Feed Callback
 include( plugin_dir_path( __FILE__ ) . 'blocks/events-post-feed/callback.php');
-
-
-

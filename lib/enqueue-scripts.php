@@ -3,7 +3,7 @@
 /**
  * Enqueue block editor only JavaScript and CSS
  */
-function hms_blocks_editor_scripts() {
+function hms_events_editor_scripts() {
 
     // Make paths variables so we don't write em twice ;)
     $blockPath = '../assets/js/editor.blocks.js';
@@ -27,13 +27,13 @@ function hms_blocks_editor_scripts() {
 
 }
 // Hook scripts function into block editor hook
-add_action( 'enqueue_block_editor_assets', 'hms_blocks_editor_scripts' );
+add_action( 'enqueue_block_editor_assets', 'hms_events_editor_scripts' );
 
 
 /**
  * Enqueue front end and editor JavaScript and CSS
  */
-function hms_blocks_scripts()
+function hms_events_scripts()
 {
     // Make paths variables so we don't write em twice ;)
     $blockPath = '../assets/js/frontend.blocks.js';
@@ -60,4 +60,4 @@ function hms_blocks_scripts()
 }
 
 // Hook scripts function into block editor hook
-add_action('enqueue_block_assets', 'hms_blocks_scripts');
+add_action('enqueue_block_assets', 'hms_events_scripts');
