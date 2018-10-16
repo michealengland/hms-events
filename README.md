@@ -10,6 +10,9 @@ This plugin requires the use of Advanced Custom Fields and ACF to Rest plugins. 
 - Added events-cpt.php to register post types from the block.
 - Updated various files.
 - Refactored plugin.
+- Fixed taxonomy bug.
+- Added ACF fields to plugin to reduce setup time.
+- Modified $content on the archive and singlular post to display event start and event end times.
 
 ## 0.0.1
 - Working version of plugin. 

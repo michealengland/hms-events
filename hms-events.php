@@ -32,6 +32,9 @@ include( plugin_dir_path( __FILE__ ) . 'lib/enqueue-scripts.php');
 // Register Post Types & Taxonomies
 include( plugin_dir_path( __FILE__ ) . 'lib/events-cpt.php');
 
+// Register ACF Fields
+include( plugin_dir_path( __FILE__ ) . 'lib/fields.php');
+
 // Block Templates
 include( plugin_dir_path( __FILE__ ) . 'lib/block-templates.php');
 

@@ -281,7 +281,7 @@ export default withSelect( ( select, props ) => {
 		// Enables post type on displayed posts.		
 		latestPosts: getEntityRecords( 'postType', 'hmsevents', eventPostsQuery ),
 		// Adds hms_event_types dropdown selector list.
-		categoriesList: getEntityRecords( 'taxonomy','hms_event_types', eventTypesListQuery ),
+		categoriesList: getEntityRecords( 'taxonomy','hmseventtypes', eventTypesListQuery ),
 	}
 
 	

@@ -138,11 +138,11 @@ function register_block_event_post_feed() {
 				),
 				'displayStartDate' => array(
 					'type'    => 'boolean',
-					'default' => false,
+					'default' => true,
 				),
 				'displayEndDate' => array(
 					'type'    => 'boolean',
-					'default' => false,
+					'default' => true,
 				),
 				'displayPostImage' => array(
 					'type'    => 'boolean',
