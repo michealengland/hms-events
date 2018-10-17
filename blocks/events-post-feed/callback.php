@@ -7,11 +7,10 @@
  * @return string Returns the post content with latest posts added.
  */
 function render_block_event_post_feed( $attributes ) {
-	
+
 	/**
 	 * 196 is the default tax id
 	 */
-
 	$term_id = $attributes['categories'];
 	
 	if( $term_id !== null ) {
@@ -22,7 +21,7 @@ function render_block_event_post_feed( $attributes ) {
 				'numberposts' => $attributes['postsToShow'],
 				'post_status' => 'publish',
 				'orderby'     => $attributes['orderBy'], // orders by desc or asc
-				'meta_key' => 'event_date_start', // 
+				'meta_key' 	  => 'event_date_start', // 
 				'order'       => $attributes['order'],
 				// Only allows posts from selected taxonomy
 				'tax_query' => array(
@@ -32,9 +31,7 @@ function render_block_event_post_feed( $attributes ) {
 						'terms'    => $attributes['categories'],
 					),
 				),
-				
 				// Only allows posts that does not have a date time that is before the current date.
-				
 				'meta_query' => array( 
 					array(
 						'key'     => 'event_date_start', // ENDING DATE
@@ -74,58 +71,140 @@ function render_block_event_post_feed( $attributes ) {
 		);	
 	}
 
+/*
+<section class="event-post-feed is-grid" aria-label="Events">
+<article class="event-item">
+	<script type="application/ld+json">
+	{
+		"@context": "http://schema.org",
+		"@type": "Event",
+		"name": "Event Name",
+		"description": "This an example location description",
+		"image": "https://dummyimage.com/600x400/000/fff",
+		"startDate": "2018-10-25T23:55",
+		"endDate": "2018-11-10T19:55",
+		"location": {
+			"@type": "Place",
+			"name": "Location Name",
+			"hasMap": "#",
+			"address": {
+				"@type": "PostalAddress",
+				"streetAddress": "221 Example Ave.",
+				"addressLocality": "Springfield",
+				"addressRegion": "OH",
+				"postalCode": "45501",
+				"addressCountry": "US"
+			}
+		}
+	}
+	</script>
+	<img src="https://dummyimage.com/600x400/000/fff" alt="" width="600" height="400"/>
+	<div class="event-content">
+		<h2 id="events" ><a href="#">Event Name</a></h2>
+		Start: <span class="event-start">Thu, 10/21/18 @ 8:00 p.m.</span><br>
+		End: <span class="event-end">Thu, 10/21/18 @ 10:00 p.m.</span>
+		<p class="description">This an example location description</p>
+		<div class="address">
+			<span class="location-title">Location Name</span>
+			<div itemprop="address">
+				<span class="street-1">221 Example Ave.</span><br>
+				<span class="zip">45501</span>,
+				<span class="city">Springfield</span>,
+				<span class="region">Ohio</span>
+			</div>
+			<a itemprop="hasMap" href="#" title="View on Google Maps">Get Directions</a>
+		</div>
+	</div>
+ </article>
+<section>
+*/
 
-
-
-	$list_items_markup = '';
+	$event_items_markup = '';
 	foreach ( $recent_posts as $post ) {
+
+		// Vars 
 		$post_id = $post['ID'];
 		$title = get_the_title( $post_id );
+		
 		if ( ! $title ) {
-			$title = __( '(Untitled)', 'gutenberg' );
+			$title = __( '(Untitled)', 'hms-events' );
         }
 
-        $list_items_markup .= '<li>';
+		// Post Container
+        $event_items_markup .= '<article id="' . $post['ID'] . '">';
 
-		if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] ) {
-			$list_items_markup .= get_the_post_thumbnail( $post_id, 'thumbnail' );
-		}
-		
+			// Event Featured Image
+			if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] ) {
+				$event_items_markup .= get_the_post_thumbnail( $post_id, 'thumbnail' );
+			}
 
-		$list_items_markup .= sprintf(
-            '<a href="%1$s">%2$s</a>',
-            //get_the_post_thumbnail( $post_id, 'post-thumbnail' ),
-			esc_url( get_permalink( $post_id ) ),
-			esc_html( $title )
-        );
+			$event_items_markup .= '<div class="event-content">';
+			
+				// Event Title
+				$event_items_markup .= sprintf(
+					'<a href="%1$s">%2$s</a>',
+					//get_the_post_thumbnail( $post_id, 'post-thumbnail' ),
+					esc_url( get_permalink( $post_id ) ),
+					esc_html( $title )
+				);
 
-		if ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) {
-			$list_items_markup .= sprintf(
-				'<time datetime="%1$s" class="wp-block-latest-posts__post-date">%2$s</time>',
-				esc_attr( get_the_date( 'c', $post_id ) ),
-				esc_html( get_the_date( '', $post_id ) )
-			);
-		}
+				// Event Post Publish Date
+				if ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) {
+					$event_items_markup .= sprintf(
+						'<time datetime="%1$s" class="wp-block-latest-posts__post-date">%2$s</time>',
+						esc_attr( get_the_date( 'c', $post_id ) ),
+						esc_html( get_the_date( '', $post_id ) )
+					);
+				}
+
+				// Event Start & End Date Times
+				$event_items_markup .= '<div class="eventTimes">';
+
+				// Display Event Start Date Time
+				if ( isset( $attributes['displayStartDate'] ) && $attributes['displayStartDate'] ) {
+					$event_items_markup .= '<span class="event-start">Start: ' . get_field('event_date_start', $post_id ) . '</span><br>';
+				}
+
+				// Display Event End Date Time
+				if ( isset( $attributes['displayEndDate'] ) && $attributes['displayEndDate'] ) {
+					$event_items_markup .= '<span class="event-start">End: ' . get_field('event_date_end', $post_id ) . '</span><br>';
+				}
+
+				$event_items_markup .= '</div>';
 
 
-		$list_items_markup .= '<p><span class="eventTimes">';
+				/**
+				 * Address
+				 */
+				if ( isset( $attributes['displayAddress'] ) && $attributes['displayAddress'] ) {
+					$event_items_markup .= '<div class="address">';
 
-		// Display Event Start Date Time
-		if ( isset( $attributes['displayStartDate'] ) && $attributes['displayStartDate'] ) {
+					// Location Name
+					$event_items_markup .= '<span class="location-title">Location Name</span>';
+					
+						// Postal Address
+						$event_items_markup .= '<div class="postal-address" itemprop="address">';
+							$event_items_markup .= '<span class="street-1">221 Example Ave.</span><br>';
+							$event_items_markup .= '<span class="zip">45501</span>,';
+							$event_items_markup .= '<span class="city">Springfield</span>,';
+							$event_items_markup .= '<span class="region">Ohio</span>';
+						$event_items_markup .= '</div>';
+					
+					$event_items_markup .= '</div>';
+				}
 
-			$list_items_markup .= get_field('event_date_start', $post_id );
-		}
 
-		// Display Event End Date Time
-		if ( isset( $attributes['displayEndDate'] ) && $attributes['displayEndDate'] ) {
+				// Display Event End Date Time
+				if ( isset( $attributes['displayMapLink'] ) && $attributes['displayMapLink'] ) {
+					$event_items_markup .= '<a itemprop="hasMap" href="#" title="View on Google Maps">Get Directions</a>';
+				}
 
-			$list_items_markup .= ' to ' . get_field('event_date_end', $post_id );
-		}
 
-		$list_items_markup .= '</span></p>';
 
-        
-		$list_items_markup .= "</li>\n";
+			$event_items_markup .= '</div>';
+
+        // Event Item Closing Tag
+		$event_items_markup .= "</article>\n";
 	}
 	$class = 'wp-block-latest-posts hms-custom-post-feed';
 	if ( isset( $attributes['align'] ) ) {
@@ -141,9 +220,9 @@ function render_block_event_post_feed( $attributes ) {
 		$class .= ' ' . $attributes['className'];
 	}
 	$block_content = sprintf(
-		'<ul class="%1$s">%2$s</ul>',
+		'<section class="%1$s aria-label="Events">%2$s</section>',
 		esc_attr( $class ),
-		$list_items_markup
+		$event_items_markup
 	);
 	return $block_content;
 }
@@ -185,6 +264,10 @@ function register_block_event_post_feed() {
 					'default' => true,
 				),
 				'displayPostImage' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+				'displayAddress' => array(
 					'type'    => 'boolean',
 					'default' => false,
 				),

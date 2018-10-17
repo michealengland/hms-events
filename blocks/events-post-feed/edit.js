@@ -40,6 +40,7 @@ class EventsPostsFeedEdit extends Component {
 		this.toggleDisplayStartDate = this.toggleDisplayStartDate.bind( this );
 		this.toggleDisplayEndDate = this.toggleDisplayEndDate.bind( this );
 		this.toggleDisplayPostImage = this.toggleDisplayPostImage.bind( this );
+		this.toggleDisplayAddress = this.toggleDisplayAddress.bind( this );
 	}
 
 	toggleDisplayPostDate() {
@@ -69,10 +70,17 @@ class EventsPostsFeedEdit extends Component {
 
 		setAttributes( { displayPostImage: ! displayPostImage } );
 	}
+
+	toggleDisplayAddress() {
+		const { displayAddress } = this.props.attributes;
+		const { setAttributes } = this.props;
+
+		setAttributes( { displayAddress: ! displayAddress } );
+	}
     
 	render() {
 		const { attributes, categoriesList, setAttributes, latestPosts } = this.props;
-		const { displayPostDate, displayStartDate, displayEndDate, displayPostImage, imageCrop, align, postLayout, columns, order, orderBy, categories, postsToShow, startDate } = attributes;
+		const { displayPostDate, displayStartDate, displayEndDate, displayPostImage, displayAddress, imageCrop, align, postLayout, columns, order, orderBy, categories, postsToShow, startDate } = attributes;
 
 		// Thumbnail options
 		const imageCropOptions = [
@@ -128,6 +136,12 @@ class EventsPostsFeedEdit extends Component {
 						label={ __( 'Display event ending time.' ) }
 						checked={ displayEndDate }
 						onChange={ this.toggleDisplayEndDate }
+					/>
+
+					<ToggleControl
+						label={ __( 'Display Location Details' ) }
+						checked={ displayAddress }
+						onChange={ this.toggleDisplayAddress }
 					/>
 
 					{ postLayout === 'grid' &&
@@ -211,8 +225,6 @@ class EventsPostsFeedEdit extends Component {
 						) }
 						>
 
-						{ console.log( post.acf ) }
-
 						{
 							displayPostImage && post.featured_image_src !== undefined && post.featured_image_src ? (
 							<div class="hms-block-post-grid-image">
@@ -248,6 +260,22 @@ class EventsPostsFeedEdit extends Component {
 							) : (
 								null
 							)
+						}
+
+
+						{
+
+							displayAddress ? (
+								
+								// Location Title
+								<p>{ "Location Details: "+post.acf.event_location_title }</p>,
+								<p>{ "Street: "+post.acf.event_street }</p>,
+								<p>{ post.acf.event_citypost+", "+post.acf.event_zip+", "+post.acf.event_state }</p>
+								
+							) : (
+								null
+							)
+
 						}
 
 						
