@@ -7,35 +7,75 @@
  * @return string Returns the post content with latest posts added.
  */
 function render_block_event_post_feed( $attributes ) {
+	
+	/**
+	 * 196 is the default tax id
+	 */
 
-	$recent_posts = wp_get_recent_posts(
-		array(
-            'post_type'   => 'hmsevents',
-			'numberposts' => $attributes['postsToShow'],
-			'post_status' => 'publish',
-			'orderby'     => $attributes['orderBy'], // orders by desc or asc
-			'meta_key' => 'event_date_start', // 
-			'order'       => $attributes['order'],
-			// Only allows posts from selected taxonomy
-			'tax_query' => array(
-				array(
-					'taxonomy' => 'hmseventtypes',
-					'field'    => 'term_id',
-					'terms'    => $attributes['categories'],
+	$term_id = $attributes['categories'];
+	
+	if( $term_id !== null ) {
+		
+		$recent_posts = wp_get_recent_posts(
+			array(
+				'post_type'   => 'hmsevents',
+				'numberposts' => $attributes['postsToShow'],
+				'post_status' => 'publish',
+				'orderby'     => $attributes['orderBy'], // orders by desc or asc
+				'meta_key' => 'event_date_start', // 
+				'order'       => $attributes['order'],
+				// Only allows posts from selected taxonomy
+				'tax_query' => array(
+					array(
+						'taxonomy' => 'hmseventtypes',
+						'field'    => 'term_id',
+						'terms'    => $attributes['categories'],
+					),
 				),
-			),
-			// Only allows posts that does not have a date time that is before the current date.
-			'meta_query' => array( 
-				array(
-					'key'     => 'event_date_start', // ENDING DATE
-					'value'   => date( 'Ymd' ), // Current Date
-					'compare' => '>=', // event_date_time is greater than or equal to $current_time
-					'type'    => 'DATE',
+				
+				// Only allows posts that does not have a date time that is before the current date.
+				
+				'meta_query' => array( 
+					array(
+						'key'     => 'event_date_start', // ENDING DATE
+						'value'   => date( 'Ymd' ), // Current Date
+						'compare' => '>=', // event_date_time is greater than or equal to $current_time
+						'type'    => 'DATE',
+					),
 				),
-			),
-			'OBJECT',
-		)
-	);
+				'OBJECT',
+			)
+		);
+	} else {
+
+		/**
+		 * Display the all terms in hmseventtypes
+		 */
+		$recent_posts = wp_get_recent_posts(
+			array(
+				'post_type'   => 'hmsevents',
+				'taxonomy'	  => 'hmseventtypes',
+				'numberposts' => $attributes['postsToShow'],
+				'post_status' => 'publish',
+				'orderby'     => $attributes['orderBy'], // orders by desc or asc
+				'meta_key' 	  => 'event_date_start', // 
+				'order'       => $attributes['order'],
+				// Only allows posts that does not have a date time that is before the current date.
+				'meta_query' => array( 
+					array(
+						'key'     => 'event_date_start', // ENDING DATE
+						'value'   => date( 'Ymd' ), // Current Date
+						'compare' => '>=', // event_date_time is greater than or equal to $current_time
+						'type'    => 'DATE',
+					),
+				),
+				'OBJECT',
+			)
+		);	
+	}
+
+
+
 
 	$list_items_markup = '';
 	foreach ( $recent_posts as $post ) {

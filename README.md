@@ -6,6 +6,10 @@ This plugin requires the use of Advanced Custom Fields and ACF to Rest plugins. 
 
 #Change Log
 
+## 0.0.31
+- Added conditional for query if $attributes['categories'] == null
+- Re-tested block.
+
 ## 0.0.3 
 - Fixed posts non displaying on front end. 
 - Fixed taxonomy dropdown in the Events Feed Block.
