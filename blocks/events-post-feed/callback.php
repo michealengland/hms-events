@@ -10,7 +10,7 @@ function render_block_event_post_feed( $attributes ) {
 
 	$recent_posts = wp_get_recent_posts(
 		array(
-            'post_type'   => 'hms_events_cpt_1',
+            'post_type'   => 'hmsevents',
 			'numberposts' => $attributes['postsToShow'],
 			'post_status' => 'publish',
 			'orderby'     => $attributes['orderBy'], // orders by desc or asc
@@ -19,7 +19,7 @@ function render_block_event_post_feed( $attributes ) {
 			// Only allows posts from selected taxonomy
 			'tax_query' => array(
 				array(
-					'taxonomy' => 'hms_event_types',
+					'taxonomy' => 'hmseventtypes',
 					'field'    => 'term_id',
 					'terms'    => $attributes['categories'],
 				),
@@ -191,7 +191,7 @@ function hms_events_register_rest_fields() {
 	
 	// Add landscape featured image source
 	register_rest_field(
-		'hms_events_cpt_1',
+		'hmsevents',
 		'featured_image_src',
 		array(
 			'get_callback' => 'hms_events_get_image_src_landscape',
@@ -202,7 +202,7 @@ function hms_events_register_rest_fields() {
 
 	// Add square featured image source
 	register_rest_field(
-		'hms_events_cpt_1',
+		'hmsevents',
 		'featured_image_src_square',
 		array(
 			'get_callback' => 'hms_events_get_image_src_square',

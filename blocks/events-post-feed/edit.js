@@ -264,7 +264,7 @@ export default withSelect( ( select, props ) => {
 	const { getEntityRecords } = select( 'core' );
 	
 	const eventPostsQuery = pickBy( {
-		hms_event_types: categories, // Changes rest base to hms_event_types taxonomy and selects term by Id
+		hmseventtypes: categories, // Changes rest base to hms_event_types taxonomy and selects term by Id
 		order,
 		orderby: orderBy,
 		query: true,
