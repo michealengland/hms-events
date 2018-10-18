@@ -6,6 +6,12 @@ This plugin requires the use of Advanced Custom Fields and ACF to Rest plugins. 
 
 #Change Log
 
+## 0.0.32
+- Added additional information fields for address and contact information.
+- Setup schema.
+- Added additional display options to Event Post Block.
+- Modified display on singular and archive event posts.
+
 ## 0.0.31
 - Added conditional for query if $attributes['categories'] == null
 - Re-tested block.

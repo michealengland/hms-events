@@ -210,51 +210,242 @@ acf_add_local_field_group(array(
 	'hide_on_screen' => '',
 	'active' => 1,
 	'description' => '',
-));
+) );
 
 endif;
 
 
 
 
+if( ! function_exists('hms_format_phone') ) {
+	/**
+	*
+	* Format a USA Phone Number.
+	*
+	*/
+	function hms_format_phone( $hms_pre_formatted_phone, $hms_phone_title ) {
+		//$hms_pre_formatted_phone = '';
+		if( isset( $hms_pre_formatted_phone ) ) {
+
+		$phone_country = '';
+		$phone_area = '';
+		$phone_prefix = '';
+		$phone_line = '';
+
+			//Strips all characters except integers
+			$clean_phone = preg_replace('/[^0-9]/','', $hms_pre_formatted_phone );
+
+			if( isset( $clean_phone ) ) {
+
+		if( strlen( $clean_phone ) < 10 ) {
+			$hms_phone_formatted = '<a class="hms-phone" href="tel:+' . $clean_phone . '" target="_self" title="Call ' . $hms_phone_title . '" target="_self">' . $clean_phone . '</a>';
+			}
+
+
+		if( strlen( $clean_phone ) == 10 ) {
+					//Example Number 937 267 6586
+				$phone_country = '1';
+				$phone_area = substr( $clean_phone, 0, 3 );
+				$phone_prefix = substr( $clean_phone, 3, 3 );
+				$phone_line = substr($clean_phone, 6, 4 );
+
+			$hms_phone_formatted = '<a class="hms-phone" href="tel:+' . $phone_country . $clean_phone . '" target="_self" title="Call ' . $hms_phone_title . '" target="_self">(' . $phone_area . ') ' . $phone_prefix . '-' . $phone_line . '</a>';
+
+			} elseif( strlen( $clean_phone ) == 11 ) {
+					//Example Number 1 937 267 6586
+					$phone_country = '1';
+				$phone_area = substr( $clean_phone, 1, 3 );
+				$phone_prefix = substr( $clean_phone, 4, 3 );
+				$phone_line = substr( $clean_phone, 7, 4 );
+
+			$hms_phone_formatted = '<a class="hms-phone" href="tel:+' . $phone_country . $clean_phone . '" target="_self" title="Call ' . $hms_phone_title . '" target="_self">(' . $phone_area . ') ' . $phone_prefix . '-' . $phone_line . '</a>';
+			}
+
+				return $hms_phone_formatted; // Returns Phone Number Link
+
+			} // End if $clean_phone
+
+		} // End if isset
+
+	} // End hms_format_phone()
+}
+
+
+
+
+
+
+
+
+
+function get_event_fields() {
+	$event_location_title = get_field('event_location_title' );
+	$event_street = get_field('event_street' );
+	$event_street_2 = get_field('event_street_2' );
+	$event_city = get_field('event_city' );
+	$event_state = get_field('event_state' );
+	$event_zip = get_field('event_zip' );
+	$event_map_link = get_field('event_map_link' );
+	
+	$event_date_start = get_field('event_date_start' );
+	$event_date_end = get_field('event_date_end' );
+	
+	$event_email = get_field('event_email'); 
+	$event_phone = get_field('event_phone'); 
+	$hms_pre_formatted_phone = $event_phone;
+}
 
 /**
  * Insert Dates into the content
  */
 
 add_filter( 'the_content', 'add_event_dates' ); 
+
+if( function_exists('get_field') && ! function_exists('get_event_data') ) {
+	
+	function get_event_data() {
+	$event_location_title = get_field('event_location_title' );
+	$event_street = get_field('event_street' );
+	$event_street_2 = get_field('event_street_2' );
+	$event_city = get_field('event_city' );
+	$event_state = get_field('event_state' );
+	$event_zip = get_field('event_zip' );
+	$event_map_link = get_field('event_map_link' );
+
+	$event_date_start = get_field('event_date_start' );
+	$event_date_end = get_field('event_date_end' );
+
+	$event_email = get_field('event_email'); 
+	$event_phone = get_field('event_phone'); 
+	$hms_pre_formatted_phone = $event_phone;
+	?>
+
+	<aside class="event-meta" role="complementary">
+
+	<?php
+		/**
+		 * Event JSON Schema
+		 */
+
+		$event_schema = '';
+		$event_json = [];
+		$event_json[] .=	'"@context": "http://schema.org"';
+		$event_json[] .=	'"@type": "Event"';
+		$event_json[] .=	'"name": "' . get_the_title() . '"';
+		$event_json[] .= 	'"description": "' . sanitize_text_field( get_the_content() ) . '"';
+
+		if( has_post_thumbnail() ) {
+			$event_json[] .= '"image": "' . get_the_post_thumbnail_url( 'thumbnail' )  . '"';
+		}
+		
+		if( $event_date_start ) {
+			$event_json[] .= '"startDate": "2018-10-25T23:55"';
+		}
+		
+		if( $event_date_end ) { 
+			$event_json[] .= '"endDate": "2018-11-10T19:55"';
+		}
+
+		/**
+		 * Event Location Details
+		*/
+		$event_location = [];
+
+		$event_location[] .= '"@type": "Place"';
+
+		// Location Title
+		if( $event_location_title ) {
+			$event_location[] .= '"name": "' . $event_location_title . '"';
+		}
+		// Map Link
+		if( $event_map_link ) {
+			$event_location[] .= '"hasMap": "' . $event_map_link . '"';
+		}
+
+		if( $event_street && $event_city && $event_state && $event_zip  ) {
+
+			$event_location[] .= '"address": {
+				"@type": "PostalAddress",
+				"streetAddress": "' . $event_street . '",
+				"addressLocality": "' . $event_city . '",
+				"addressRegion": "' . $event_state . '",
+				"postalCode": "' . $event_zip . '",
+				"addressCountry": "US"
+			}';
+
+		}
+
+		
+		$event_json[] .= '"location": {' . implode(', ', $event_location ) . '}';
+	
+		// Output Event JSON as Comma Separated List
+		$event_schema = '<script type="application/ld+json">{' . implode(', ', $event_json ) . '}</script>';
+
+		echo $event_schema;
+	?>
+
+	<dl>
+			<?php if( $event_date_start OR $event_date_end ) : ?>
+			<dt>When:</dt>
+				<?php if( $event_date_start ) : ?>
+					<dd class="event-start">Start: <?php echo $event_date_start; ?></dd>
+				<?php endif; ?>
+
+				<?php if( $event_date_end ) : ?>
+					<dd class="event-end">End: <?php echo $event_date_end; ?></dd>
+				<?php endif; ?>
+			<?php endif; ?>
+
+			<?php if( is_singular('hmsevents') && $event_location_title OR $event_street OR $event_city ) : ?>
+				<dt class="label">Location:</dt>
+				<!-- Location Title -->
+				<?php if( $event_location_title ) : ?>
+					<dd class="location-title"><?php echo $event_location_title; ?></dd>
+				<?php endif; ?>
+
+				<!-- Street Address -->
+				<?php if( $event_street && $event_city && $event_state && $event_zip ) : ?>
+					<dd><?php echo $event_street . '<br>' . $event_city . ', ' . $event_state . ', ' . $event_zip; ?><dd>
+				<?php endif; ?>
+
+				<!-- Location Map -->
+				<?php if( $event_map_link ) : ?>
+					<dd><a class="read-more-button" href="<?php echo $event_map_link; ?>" title="<?php echo $event_location_title; ?> Google Map Directions" target="_blank">Get Directions</a><dd>
+				<?php endif; ?>
+			<?php endif; ?>
+			
+			<?php if( $event_phone OR $event_email ) : ?>
+				<!-- Location Phone -->
+				<dt class="label">Contact Information:</dt>
+				<?php if( $hms_pre_formatted_phone ) : ?>
+					<?php $hms_phone_title = $event_location_title; ?> 
+					<dd><?php echo hms_format_phone( $hms_pre_formatted_phone, $hms_phone_title );?><dd>
+				<?php endif; ?>
+			
+				<!-- Location Email -->
+				<?php if( $event_email ) : ?>
+					<dd><a class="event-email" href="mailto:<?php echo $event_email; ?>" title="Email <?php echo $event_location_title; ?>" target="_blank"><?php echo $event_email; ?></a><dd>
+				<?php endif; ?>
+
+			<?php endif; ?>
+		</dl>
+		</aside><!-- .hms-summary-details -->
+
+	<?php
+	}
+}
+
  
 function add_event_dates( $content ) { 
-   if ( is_singular('hmsevents') OR is_post_type_archive('hmsevents') ) {
+   if ( is_singular('hmsevents') ) {
 
-        $event_time = '';
+		$event_data = get_event_data();
 
-        if( function_exists('get_field') ) {
+		$content = $event_data . $content;
 
-            $event_start = get_field( 'event_date_start' );
-            $event_end = get_field( 'event_date_end' );
+    } elseif( is_post_type_archive( 'hmsevents' ) ) {
 
-            // Return Content if both values are empty.
-            if( $event_start == '' && $event_end == '' ) {
-                return $content;
-            }
-            
-            // Outer Container
-            $event_time .= '<div class="event-time">';
-                
-                if( $event_start ) {
-                    $event_time .= '<p><span class="start-time">Start Time ' . get_field('event_date_start') . '</span></p>';
-                }
-            
-                if( $event_end ) {
-                    $event_time .= '<p><span class="start-time">End Time: ' . get_field('event_date_end') . '</span></p>';
-                }
-            
-            $event_time .= '</div>';
-        }
-
-        $content = $event_time . $content;
-    }
+	}
 
    return $content;
 }

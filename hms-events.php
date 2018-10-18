@@ -7,7 +7,7 @@
  * Domain Path: /languages
  * Author: Mike England @mikelikethebike
  * Author URI: https://twitter.com/mikelikethebike
- * Version: 0.0.31
+ * Version: 0.0.32
  * License: GPL2+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
  *
