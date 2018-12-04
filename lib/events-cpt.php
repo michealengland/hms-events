@@ -103,3 +103,37 @@ function hms_events_register_tax() {
 }
 
 add_action( 'init', 'hms_events_register_tax' );
+
+
+/**
+ * Create Custom Post Type Query
+ */
+function hms_event_queries( $query ) {
+    if ( is_admin() || ! $query->is_main_query() )
+        return;
+
+    // EVENTS
+    if ( is_post_type_archive( 'hmsevents' ) ) {
+
+      $current_time = current_time( 'Ymd' );
+      $query->set( 'posts_per_page', 10 );
+      $query->set( 'post_status', 'PUBLISHED' );
+      $query->set('meta_key', 'event_date_start');
+      $query->set('orderby', 'meta_value');
+      $query->set('order', 'ASC');
+      $query->set( 'meta_query', [
+      // 'relation' => 'AND',
+          [
+            'key'     => 'event_date_start', // ENDING DATE
+            'value'   => date('Ymd'), // Current Date
+            'compare' => '>=', // event_date_time is greater than or equal to $current_time
+            'type'    => 'DATE',
+          ]
+        ]
+      );
+    }
+
+    return $query;
+}
+
+add_action( 'pre_get_posts', 'hms_event_queries', 15 );

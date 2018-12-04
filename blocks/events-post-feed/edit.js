@@ -26,12 +26,17 @@ const {
 	InspectorControls,
 	BlockAlignmentToolbar,
 	BlockControls,
+	RichText
 } = wp.editor;
 const {
 	withSelect,
 } = wp.data;
 
 const MAX_POSTS_COLUMNS = 6;
+
+function onChangeHeader( newEventHeader ) {
+	setAttributes( { eventHeader: newEventHeader } );
+}
 
 class EventsPostsFeedEdit extends Component {
 	constructor() {
@@ -85,10 +90,12 @@ class EventsPostsFeedEdit extends Component {
 
 		setAttributes( { displayMapLink: ! displayMapLink } );
 	}
+
+
     
 	render() {
 		const { attributes, categoriesList, setAttributes, latestPosts } = this.props;
-		const { displayPostDate, displayStartDate, displayEndDate, displayPostImage, displayAddress, displayMapLink, imageCrop, align, postLayout, columns, order, orderBy, categories, postsToShow, startDate } = attributes;
+		const { displayPostDate, displayStartDate, displayEndDate, displayPostImage, displayAddress, displayMapLink, eventHeader, imageCrop, align, postLayout, columns, order, orderBy, categories, postsToShow, startDate } = attributes;
 
 		// Thumbnail options
 		const imageCropOptions = [
@@ -107,8 +114,8 @@ class EventsPostsFeedEdit extends Component {
 						numberOfItems={ postsToShow }
 						categoriesList={ categoriesList }
 						selectedCategoryId={ categories }
-						onOrderChange={ ( value ) => setAttributes( { order: value } ) }
-						onOrderByChange={ ( value ) => setAttributes( { orderBy: value } ) }
+						//onOrderChange={ ( value ) => setAttributes( { order: value } ) }
+						//onOrderByChange={ ( value ) => setAttributes( { orderBy: value } ) }
 						onCategoryChange={ ( value ) => setAttributes( { categories: '' !== value ? value : undefined } ) }
 						onNumberOfItemsChange={ ( value ) => setAttributes( { postsToShow: value } ) }
 					/>
@@ -118,15 +125,6 @@ class EventsPostsFeedEdit extends Component {
 						checked={ displayPostImage }
 						onChange={ this.toggleDisplayPostImage }
 					/>
-
-					{ displayPostImage &&
-						<SelectControl
-							label={ __( 'Featured Image Style' ) }
-							options={ imageCropOptions }
-							value={ imageCrop }
-							onChange={ ( value ) => this.props.setAttributes( { imageCrop: value } ) }
-						/>
-					}
 					
 					<ToggleControl
 						label={ __( 'Display event starting time.' ) }
@@ -218,6 +216,13 @@ class EventsPostsFeedEdit extends Component {
 					<Toolbar controls={ layoutControls } />
 				</BlockControls>
 
+				<RichText
+					tagName="h2"
+					onChange={ onChangeHeader }
+					value={ eventHeader }
+					placeholder="Events"
+				/>
+
 				<ul
 				className={ classnames( this.props.className, 'wp-block-latest-posts', {
 					'is-grid': postLayout === 'grid',
@@ -233,13 +238,11 @@ class EventsPostsFeedEdit extends Component {
 						) }
 						>
 
-						{ console.log( post )}
-
 						{
 							displayPostImage && post.featured_image_src !== undefined && post.featured_image_src ? (
 							<div class="hms-block-post-grid-image">
 								<img
-								src={ isLandscape ? post.featured_image_src : post.featured_image_src_square }
+								src={ post.featured_image_src_square }
 								alt={ decodeEntities( post.title.rendered.trim() ) || __( '(Untitled)' ) }
 								/>
 							</div>	

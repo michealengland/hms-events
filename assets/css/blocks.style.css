@@ -19,7 +19,6 @@
         align-items: center;
     -ms-flex-pack: end;
         justify-content: flex-end;
-    background-color: #eee;
     -ms-flex-direction: column;
         flex-direction: column; }
     .hms-custom-post-feed.is-grid li img {

@@ -8,11 +8,10 @@
  */
 function render_block_event_post_feed( $attributes ) {
 
-	/**
-	 * 196 is the default tax id
-	 */
+	// Check if term has categories
 	$term_id = $attributes['categories'];
 	
+	// get terms by category
 	if( $term_id !== null ) {
 		
 		$recent_posts = wp_get_recent_posts(
@@ -20,9 +19,9 @@ function render_block_event_post_feed( $attributes ) {
 				'post_type'   => 'hmsevents',
 				'numberposts' => $attributes['postsToShow'],
 				'post_status' => 'publish',
-				'orderby'     => $attributes['orderBy'], // orders by desc or asc
-				'meta_key' 	  => 'event_date_start', // 
-				'order'       => $attributes['order'],
+				'meta_key' 	  => 'event_date_start', 
+				'orderby'	  => 'meta_value',
+				'order'		  => 'ASC',
 				// Only allows posts from selected taxonomy
 				'tax_query' => array(
 					array(
@@ -32,7 +31,7 @@ function render_block_event_post_feed( $attributes ) {
 					),
 				),
 				// Only allows posts that does not have a date time that is before the current date.
-				'meta_query' => array( 
+				'meta_query' => array(
 					array(
 						'key'     => 'event_date_start', // ENDING DATE
 						'value'   => date( 'Ymd' ), // Current Date
@@ -43,7 +42,8 @@ function render_block_event_post_feed( $attributes ) {
 				'OBJECT',
 			)
 		);
-	} else {
+	// display non category posts.
+	} elseif( $term_id == null ) {
 
 		/**
 		 * Display the all terms in hmseventtypes
@@ -54,9 +54,9 @@ function render_block_event_post_feed( $attributes ) {
 				'taxonomy'	  => 'hmseventtypes',
 				'numberposts' => $attributes['postsToShow'],
 				'post_status' => 'publish',
-				'orderby'     => $attributes['orderBy'], // orders by desc or asc
-				'meta_key' 	  => 'event_date_start', // 
-				'order'       => $attributes['order'],
+				'meta_key' 	  => 'event_date_start',
+				'orderby'	  => 'meta_value',
+				'order'		  => 'ASC',
 				// Only allows posts that does not have a date time that is before the current date.
 				'meta_query' => array( 
 					array(
@@ -80,6 +80,10 @@ function render_block_event_post_feed( $attributes ) {
 		// Vars 
 		$post_id = $post['ID'];
 		$title = get_the_title( $post_id );
+		$post_featured_url = get_the_post_thumbnail_url( $post_id, 'medium', true );
+		$post_featured = get_the_post_thumbnail( $post_id, 'medium', true );
+		//$post_featured = get_the_post_thumbnail( $post_id, 'thumbnail' );
+		$post_featured_fallback = wp_get_attachment_image( 1074, 'medium' );
 
 		// ACF VARS
 		$event_date_start = get_field('event_date_start', $post_id );
@@ -91,13 +95,13 @@ function render_block_event_post_feed( $attributes ) {
 		$event_state = get_field('event_state', $post_id );
 		$event_zip = get_field('event_zip', $post_id );
 		$event_map_link = get_field('event_map_link', $post_id );
-		
-		
+				
 		if ( ! $title ) {
 			$title = __( '(Untitled)', 'hms-events' );
         }
 
 		// Post Container
+		$event_items_markup .= '<li>';
 		$event_items_markup .= '<article id="' . $post['ID'] . '" class="event-item">';
 		
 		/**
@@ -110,7 +114,7 @@ function render_block_event_post_feed( $attributes ) {
 		$event_json[] .= 	'"description": "' . sanitize_text_field( get_the_content( $post_id ) ) . '"';
 
 		if( has_post_thumbnail( $post_id ) ) {
-			$event_json[] .= '"image": "' . get_the_post_thumbnail_url( $post_id, 'thumbnail' )  . '"';
+			$event_json[] .= '"image": "' . $post_featured_url  . '"';
 		}
 		
 		if( $event_date_start ) {
@@ -156,20 +160,23 @@ function render_block_event_post_feed( $attributes ) {
 		// Output Event JSON as Comma Separated List
 		$event_items_markup .= '<script type="application/ld+json">{' . implode(', ', $event_json ) . '}</script>';
 
-			// Event Featured Image
-			if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] ) {
-				$event_items_markup .= get_the_post_thumbnail( $post_id, 'thumbnail' );
-			}
-
-			$event_items_markup .= '<div class="event-content">';
 			
 				// Event Title
-				$event_items_markup .= sprintf(
-					'<h3 class="entry-title"><a href="%1$s">%2$s</a></h3>',
-					//get_the_post_thumbnail( $post_id, 'post-thumbnail' ),
-					esc_url( get_permalink( $post_id ) ),
-					esc_html( $title )
-				);
+				$event_items_markup .= '<a class="event-title" href="' . esc_url( get_permalink( $post_id ) )  . '">';
+
+				// Event Featured Image
+				if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] && has_post_thumbnail($post_id) ) {
+					$event_items_markup .= $post_featured;
+				} else {
+					$event_items_markup .= $post_featured_fallback;
+				}
+
+				$event_items_markup .= esc_html( $title );
+
+
+
+				$event_items_markup .= '</a>';
+
 
 				// Event Post Publish Date
 				if ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) {
@@ -181,19 +188,20 @@ function render_block_event_post_feed( $attributes ) {
 				}
 
 				// Event Start & End Date Times
-				$event_items_markup .= '<div class="eventTimes">';
+				$event_items_markup .= '<span class="eventTimes">';
 
 				// Display Event Start Date Time
 				if ( isset( $attributes['displayStartDate'] ) && $attributes['displayStartDate'] ) {
-					$event_items_markup .= '<span class="event-start">Start: ' . $event_date_start . '</span><br>';
+					$event_items_markup .= '<span class="event-start">' . $event_date_start . '</span>';
 				}
 
 				// Display Event End Date Time
 				if ( isset( $attributes['displayEndDate'] ) && $attributes['displayEndDate'] ) {
-					$event_items_markup .= '<span class="event-start">End: ' . $event_date_end . '</span><br>';
+					$event_items_markup .= '<span class="time-divider"> - </span> '; // Divider
+					$event_items_markup .= '<span class="event-start">' . $event_date_end . '</span>';
 				}
 
-				$event_items_markup .= '</div>';
+				$event_items_markup .= '</span>';
 
 
 				/**
@@ -232,8 +240,9 @@ function render_block_event_post_feed( $attributes ) {
 							}
 						}
 
-						if( $event_map_link ) {
-							$event_items_markup .= '<span class="directions-link"><a href=' . $event_map_link . ' title="Get Directions" target="_self">Get Directions</a>';
+						// Display Google Map Link
+						if( isset( $attributes['displayMapLink'] ) && $attributes['displayMapLink'] ) {
+							$event_items_markup .= '<p class="directions-link"><a href=' . $event_map_link . ' title="Get Directions" target="_self">Get Directions</a></p>';
 						}
 							
 						$event_items_markup .= '</div>';
@@ -241,20 +250,11 @@ function render_block_event_post_feed( $attributes ) {
 					$event_items_markup .= '</div>';
 				}
 
-
-				// Display Event End Date Time
-				if( isset( $attributes['displayMapLink'] ) && $attributes['displayMapLink'] ) {
-					$event_items_markup .= '<a itemprop="hasMap" href="#" title="View on Google Maps">Get Directions</a>';
-				}
-
-
-
-			$event_items_markup .= '</div>';
-
         // Event Item Closing Tag
-		$event_items_markup .= "</article>\n";
+		$event_items_markup .= "</article>";
+		$event_items_markup .= "</li>";
 	}
-	$class = 'wp-block-latest-posts hms-custom-post-feed';
+	$class = 'wp-block-latest-posts hms-events';
 	if ( isset( $attributes['align'] ) ) {
 		$class .= ' align' . $attributes['align'];
 	}
@@ -268,11 +268,21 @@ function render_block_event_post_feed( $attributes ) {
 		$class .= ' ' . $attributes['className'];
 	}
 
-	$block_content = sprintf(
-		'<section class="%1$s aria-label="Events">%2$s</section>',
+	if( $attributes['eventHeader'] ) {
+		$block_content .= '<h2 class="events-title">' . $attributes['eventHeader'] . '</h2>';
+	}
+
+	if( ! $post ) {
+		$block_content .= '<div class="no-events"><p>No events are scheduled at this time, please check back later.</p></div>';
+	}
+
+	$block_content .= sprintf(
+		'<ul class="%1$s aria-label="Events">%2$s</ul>',
 		esc_attr( $class ),
 		$event_items_markup
 	);
+
+
 
 	return $block_content;
 
@@ -324,6 +334,12 @@ function register_block_event_post_feed() {
 				'displayMapLink' => array(
 					'type'    => 'boolean',
 					'default' => false,
+				),
+				'eventHeader' => array(
+					'type'    => 'string',
+					'default' => 'Events',
+					'selector' => 'h2',
+					'source' => 'html',
 				),
 				'imageCrop'  => array(
 					'type' => 'string',

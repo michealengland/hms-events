@@ -6,6 +6,11 @@ This plugin requires the use of Advanced Custom Fields and ACF to Rest plugins. 
 
 #Change Log
 
+## 0.0.4
+- Added header Rich Text.
+- Added notification if no events are found.
+- Refactored fields.php so that fields can be displayed in the child theme independently.
+
 ## 0.0.32
 - Added additional information fields for address and contact information.
 - Setup schema.
