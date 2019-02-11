@@ -74,7 +74,7 @@ function render_block_event_post_feed( $attributes ) {
 	/**
 	 * Output Event Item
 	 */
-	$event_items_markup = '';
+	
 	foreach ( $recent_posts as $post ) {
 
 		// Vars 
@@ -102,158 +102,113 @@ function render_block_event_post_feed( $attributes ) {
 
 		// Post Container
 		$event_items_markup .= '<li>';
-		$event_items_markup .= '<article id="' . $post['ID'] . '" class="event-item">';
 		
-		/**
-		 * Event JSON Schema
-		 */
-		$event_json = [];
-		$event_json[] .=	'"@context": "http://schema.org"';
-		$event_json[] .=	'"@type": "Event"';
-		$event_json[] .=	'"name": "' . get_the_title( $post_id ) . '"';
-		$event_json[] .= 	'"description": "' . sanitize_text_field( get_the_content( $post_id ) ) . '"';
+			$event_items_markup .= '<article id="' . $post['ID'] . '" class="event-item">';
 
-		if( has_post_thumbnail( $post_id ) ) {
-			$event_json[] .= '"image": "' . $post_featured_url  . '"';
-		}
-		
-		if( $event_date_start ) {
-			$event_json[] .= '"startDate": "2018-10-25T23:55"';
-		}
-		
-		if( $event_date_end ) { 
-			$event_json[] .= '"endDate": "2018-11-10T19:55"';
-		}
+				
+					// Event Title
+					$event_items_markup .= '<a class="event-title" href="' . esc_url( get_permalink( $post_id ) )  . '">';
 
-		/**
-		 * Event Location Details
-		*/
-		$event_location = [];
+					// Event Featured Image
+					if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] && has_post_thumbnail($post_id) ) {
+						$event_items_markup .= $post_featured;
+					} else {
+						$event_items_markup .= $post_featured_fallback;
+					}
 
-		$event_location[] .= '"@type": "Place"';
-
-		// Location Title
-		if( $event_location_title ) {
-			$event_location[] .= '"name": "' . $event_location_title . '"';
-		}
-		// Map Link
-		if( $event_map_link ) {
-			$event_location[] .= '"hasMap": "' . $event_map_link . '"';
-		}
-
-		if( $event_street && $event_city && $event_state && $event_zip  ) {
-
-			$event_location[] .= '"address": {
-				"@type": "PostalAddress",
-				"streetAddress": "' . $event_street . '",
-				"addressLocality": "' . $event_city . '",
-				"addressRegion": "' . $event_state . '",
-				"postalCode": "' . $event_zip . '",
-				"addressCountry": "US"
-			}';
-
-		}
-
-		
-		$event_json[] .= '"location": {' . implode(', ', $event_location ) . '}';
-	
-		// Output Event JSON as Comma Separated List
-		$event_items_markup .= '<script type="application/ld+json">{' . implode(', ', $event_json ) . '}</script>';
-
-			
-				// Event Title
-				$event_items_markup .= '<a class="event-title" href="' . esc_url( get_permalink( $post_id ) )  . '">';
-
-				// Event Featured Image
-				if ( isset( $attributes['displayPostImage'] ) && $attributes['displayPostImage'] && has_post_thumbnail($post_id) ) {
-					$event_items_markup .= $post_featured;
-				} else {
-					$event_items_markup .= $post_featured_fallback;
-				}
-
-				$event_items_markup .= esc_html( $title );
+					$event_items_markup .= esc_html( $title );
 
 
 
-				$event_items_markup .= '</a>';
+					$event_items_markup .= '</a>';
 
 
-				// Event Post Publish Date
-				if ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) {
-					$event_items_markup .= sprintf(
-						'<time datetime="%1$s" class="wp-block-latest-posts__post-date">%2$s</time>',
-						esc_attr( get_the_date( 'c', $post_id ) ),
-						esc_html( get_the_date( '', $post_id ) )
-					);
-				}
+					// Event Post Publish Date
+					if ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) {
+						$event_items_markup .= sprintf(
+							'<time datetime="%1$s" class="wp-block-latest-posts__post-date">%2$s</time>',
+							esc_attr( get_the_date( 'c', $post_id ) ),
+							esc_html( get_the_date( '', $post_id ) )
+						);
+					}
 
-				// Event Start & End Date Times
-				$event_items_markup .= '<span class="eventTimes">';
+					// Event Start & End Date Times
+					$event_items_markup .= '<span class="eventTimes">';
 
-				// Display Event Start Date Time
-				if ( isset( $attributes['displayStartDate'] ) && $attributes['displayStartDate'] ) {
-					$event_items_markup .= '<span class="event-start">' . $event_date_start . '</span>';
-				}
+					// Display Event Start Date Time
+					if ( isset( $attributes['displayStartDate'] ) && $attributes['displayStartDate'] && $event_date_start ) {
+						$event_items_markup .= '<span class="event-start">' . $event_date_start . '</span>';
+					}
 
-				// Display Event End Date Time
-				if ( isset( $attributes['displayEndDate'] ) && $attributes['displayEndDate'] ) {
-					$event_items_markup .= '<span class="time-divider"> - </span> '; // Divider
-					$event_items_markup .= '<span class="event-start">' . $event_date_end . '</span>';
-				}
+					// Display Event End Date Time
+					if ( isset( $attributes['displayEndDate'] ) && $attributes['displayEndDate'] && $event_date_end ) {
+						$event_items_markup .= '<span class="time-divider"> - </span> '; // Divider
+						$event_items_markup .= '<span class="event-end">' . $event_date_end . '</span>';
+					}
 
-				$event_items_markup .= '</span>';
+					$event_items_markup .= '</span>';
 
 
-				/**
-				 * Address
-				 */
-				if ( isset( $attributes['displayAddress'] ) && $attributes['displayAddress'] ) {
-					
-					$event_items_markup .= '<div class="address">';
-
-						// Location Name
-						$event_items_markup .= '<span class="location-title">' . $event_location_title . '</span>';
-					
-						// Postal Address
-						if( $event_street && $event_city && $event_state && $event_zip ) {
+					/**
+					 * Address
+					 */
+					if ( isset( $attributes['displayAddress'] ) && $attributes['displayAddress'] ) {
 						
-						$event_items_markup .= '<div class="postal-address" itemprop="address">';
+						$event_items_markup .= '<div class="address">';
 
-							if( $event_street ) {
-								$event_items_markup .= '<span class="street-1">' . $event_street . '</span><br>';
+							// Location Name
+							if( $event_location_title ) {
+								$event_items_markup .= '<span class="location-title">' . $event_location_title . '</span>';
 							}
-
-							if( $event_street_2 ) {
-								$event_items_markup .= '<span class="street-2">' . $event_street_2 . '</span><br>';
-							}
-
-							if( $event_city ) {
-								$event_items_markup .= '<span class="city">' . $event_city . '</span>,';
-							}
+						
+							// Postal Address
+							if( $event_street && $event_city && $event_state && $event_zip ) {
 							
-							if( $event_state ) {
-								$event_items_markup .= '<span class="region">' . $event_state . '</span>,';
-							}
-							
-							if( $event_zip ) {
-								$event_items_markup .= '<span class="zip">' . $event_zip . '</span>';
-							}
-						}
+							$event_items_markup .= '<div class="postal-address" itemprop="address">';
 
-						// Display Google Map Link
-						if( isset( $attributes['displayMapLink'] ) && $attributes['displayMapLink'] ) {
-							$event_items_markup .= '<p class="directions-link"><a href=' . $event_map_link . ' title="Get Directions" target="_self">Get Directions</a></p>';
-						}
-							
+								if( $event_street ) {
+									$event_items_markup .= '<span class="street-1">' . $event_street . '</span><br>';
+								}
+
+								if( $event_street_2 ) {
+									$event_items_markup .= '<span class="street-2">' . $event_street_2 . '</span><br>';
+								}
+
+								if( $event_city ) {
+									$event_items_markup .= '<span class="city">' . $event_city . '</span>,';
+								}
+								
+								if( $event_state ) {
+									$event_items_markup .= '<span class="region">' . $event_state . '</span>,';
+								}
+								
+								if( $event_zip ) {
+									$event_items_markup .= '<span class="zip">' . $event_zip . '</span>';
+								}
+
+
+								// Display Google Map Link
+								if( isset( $attributes['displayMapLink'] ) && $attributes['displayMapLink'] && $event_map_link ) {
+									$event_items_markup .= '<p class="directions-link"><a href="' . $event_map_link . '" title="Get Directions" target="_self">Get Directions</a></p>';
+								}
+								
+							$event_items_markup .= '</div>';
+							}
+
+
+						
 						$event_items_markup .= '</div>';
-					
-					$event_items_markup .= '</div>';
-				}
+					}
 
-        // Event Item Closing Tag
-		$event_items_markup .= "</article>";
+			// Event Item Closing Tag
+			$event_items_markup .= "</article>";
+
+
 		$event_items_markup .= "</li>";
+
+		
 	}
+
 	$class = 'wp-block-latest-posts hms-events';
 	if ( isset( $attributes['align'] ) ) {
 		$class .= ' align' . $attributes['align'];
@@ -267,22 +222,17 @@ function render_block_event_post_feed( $attributes ) {
 	if ( isset( $attributes['className'] ) ) {
 		$class .= ' ' . $attributes['className'];
 	}
-
 	if( $attributes['eventHeader'] ) {
 		$block_content .= '<h2 class="events-title">' . $attributes['eventHeader'] . '</h2>';
 	}
-
 	if( ! $post ) {
 		$block_content .= '<div class="no-events"><p>No events are scheduled at this time, please check back later.</p></div>';
 	}
-
 	$block_content .= sprintf(
-		'<ul class="%1$s aria-label="Events">%2$s</ul>',
+		'<ul class="%1$s" aria-label="Events">%2$s</ul>',
 		esc_attr( $class ),
 		$event_items_markup
 	);
-
-
 
 	return $block_content;
 
